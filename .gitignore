@@ -1,0 +1,10 @@
+# Cython
+*.so
+*.c
+
+# Python
+__pycache__/
+build/
+
+# Vim
+*.swp
