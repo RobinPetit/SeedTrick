@@ -15,6 +15,7 @@ cdef class SVMKernel:
         cdef np.ndarray[np.float_t, ndim=2] ret = np.empty((N1, N2))
         cdef unsigned int i, j
         for i in range(N1):
-            for j in range(N2):
-                ret[i,j] = self.kernel(X[i], Y[j])
+            ret[i,i] = self.kernel(X[i], X[i])
+            for j in range(i+1, N2):
+                ret[j, i] = ret[i,j] = self.kernel(X[i], Y[j])
         return ret
