@@ -3,17 +3,35 @@ from libc cimport math
 cimport numpy as np
 import numpy as np
 
-cdef class StringKernel:
-    '''
-    Lodhi, H., Saunders, C., Shawe-Taylor, J., Cristianini, N., & Watkins, C. (2002).
-    Text classification using string kernels. Journal of Machine Learning Research, 2(Feb), 419-444.
+cdef class StringSubsequenceKernel:
+    r'''
+    Implementation of the String Subsequence Kernel (SSK) defined in [1].
 
+    Definition
+    ----------
+
+    Let :math:`\Sigma` be an alphabet. For :math:`n \geq 0`, let :math:`\Sigma^n` be the
+    set of all finite strings of length :math:`n` on :math:`\Sigma`.
+
+    The SSK is defined as follows:
+
+    .. math::
+        \mathsf{SSK}_N : \Sigma^* \times \Sigma^* \to \mathbb R^+ :
+        (s, t) \mapsto \sum_{u \in \Sigma^N}\sum_{\mathbf i : u = s[\mathbf i]}\sum_{\mathbf j : u = t[\mathbf j]}\lambda^{\ell(\mathbf i) + \ell(\mathbf j)}
+
+    References
+    ----------
+
+    [1] Lodhi, H., Saunders, C., Shawe-Taylor, J., Cristianini, N., & Watkins, C. (2002).
+    Text classification using string kernels. Journal of Machine Learning Research, 2(Feb), 419-444.
     https://papers.nips.cc/paper/1869-text-classification-using-string-kernels.pdf
     '''
+
     cdef unsigned int N
     cdef float lamb
     cdef bint normalized
     cdef np.ndarray K_prime
+
     def __init__(self, unsigned int N, float lambda_=.9, bint normalized=True):
         self.N = N
         self.lamb = lambda_
@@ -69,9 +87,9 @@ cdef class StringKernel:
                         if len_s > 0:
                             self.K_prime[i, len_s, len_t] += self.lamb * self.K_prime[i, len_s-1, len_t]
 
-cdef class StringKernelDP(StringKernel):
+cdef class StringSubsequenceKernelDP(StringSubsequenceKernel):
     def __init__(self, unsigned int N, float lambda_=.9, bint normalized=True):
-        StringKernel.__init__(self, N, lambda_, normalized)
+        StringSubsequenceKernel.__init__(self, N, lambda_, normalized)
 
     cdef double _k_prime(self, unsigned int i, const unsigned char[:] s, const unsigned char[:] t):
         cdef const unsigned char[:] s_minus1

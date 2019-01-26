@@ -3,7 +3,9 @@
 import numpy as np
 cimport numpy as np
 
-cdef class RBFKernel:
+from ._base cimport Kernel
+
+cdef class RBFKernel(Kernel):
     cdef float gamma
     def __init__(self, float gamma):
         self.gamma = gamma
@@ -11,7 +13,7 @@ cdef class RBFKernel:
     def __call__(self, x1, x2):
         return np.exp(-self.gamma*((x1-x2)**2).sum())
 
-cdef class PolyKernel:
+cdef class PolyKernel(Kernel):
     cdef float c, d
     def __init__(self, float c, float d):
         self.c = c
@@ -20,7 +22,7 @@ cdef class PolyKernel:
     def __call__(self, x1, x2):
         return (x1.dot(x2) + self.c)**self.d
 
-cdef class CauchyKernel:
+cdef class CauchyKernel(Kernel):
     cdef float sigma
     def __init__(self, float sigma):
         self.sigma = sigma
@@ -29,21 +31,21 @@ cdef class CauchyKernel:
         cdef float ret = ((x1-x2)**2).sum() / self.sigma**2
         return 1 / (1 + ret)
 
-cdef class MinKernel:
+cdef class MinKernel(Kernel):
     def __init__(self):
         pass
 
     def __call__(self, x1, x2):
         return np.minimum(x1, x2).sum()
 
-cdef class MaxKernel:
+cdef class MaxKernel(Kernel):
     def __init__(self):
         pass
 
     def __call__(self, x1, x2):
         return np.maximum(x1, x2).sum()
 
-cdef class SigmoidKernel:
+cdef class SigmoidKernel(Kernel):
     cdef float gamma, r
     def __init__(self, float gamma, float r):
         self.gamma = gamma
@@ -52,7 +54,7 @@ cdef class SigmoidKernel:
     def __call__(self, x1, x2):
         return np.tanh(self.gamma*np.dot(x1, x2) + self.r)
 
-cdef class NormalizedLinearKernel:
+cdef class NormalizedLinearKernel(Kernel):
     def __init__(self):
         pass
 

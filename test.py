@@ -1,4 +1,5 @@
 import kernels
+from dataset import load_musk_dataset
 from sklearn.svm import SVC
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -14,3 +15,8 @@ def test_svm():
         print(['Original RBF kernel', 'Custom RBF kernel'][i])
         clf.fit(X_train, y_train)
         print(clf.score(X_test, y_test))
+
+def test_datasets():
+    musk = load_musk_dataset()
+    print(len(musk[0].X))
+    print(len(musk[1].X))
