@@ -2,22 +2,39 @@
 
 import numpy as np
 cimport numpy as np
+from libc cimport math
 
 from ._base cimport Kernel
 
 from sklearn.metrics.pairwise import euclidean_distances
 
 cdef class MultiInstanceKernel:
-    pass
+    cdef bint normalized
+    cdef dict params
+    def __init__(self, bint normalized):
+        self.normalized = normalized
+        self.params = dict()
+
+    def __call__(self, x1, x2):
+        cdef float ret = self._compute(x1, x2)
+        if self.normalized:
+            ret /= math.sqrt(self._compute(x1, x1) * self._compute(x2, x2))
+        return ret
+
+    def get_params(self):
+        return self.params
+
+    cdef float _compute(self, np.ndarray[np.float_t, ndim=2] x1, np.ndarray[np.float_t, ndim=2] x2):
+        return -.11
 
 cdef class MinMaxKernel(MultiInstanceKernel):
     cdef float c, d
-    def __init__(self, float c, float d):
+    def __init__(self, bint normalized, float c, float d):
+        super().__init__(normalized)
         self.c = c
         self.d = d
-
-    def __call__(self, x1, x2):
-        return self._compute(x1, x2)
+        self.params['c'] = c
+        self.params['d'] = d
 
     cdef float _compute(self, np.ndarray[np.float_t, ndim=2] x1, np.ndarray[np.float_t, ndim=2] x2):
         cdef np.ndarray[np.float_t, ndim=1] sx1, sx2
@@ -30,13 +47,11 @@ cdef class MinMaxKernel(MultiInstanceKernel):
 
 cdef class SetKernel(MultiInstanceKernel):
     cdef Kernel kernel
-    def __init__(self, Kernel kernel):
+    def __init__(self, bint normalized, Kernel kernel):
+        super().__init__(normalized)
         self.kernel = kernel
 
-    def __call__(self, X, Y):
-        return self._compute(X, Y)
-
-    cdef float _compute(self, X, Y):
+    cdef float _compute(self, np.ndarray X, np.ndarray Y):
         cdef float ret = 0
         cdef unsigned int i, j
         for i in range(X.shape[0]):
@@ -46,8 +61,10 @@ cdef class SetKernel(MultiInstanceKernel):
 
 cdef class RBFSetKernel(MultiInstanceKernel):
     cdef float gamma
-    def __init__(self, float gamma):
+    def __init__(self, bint normalized, float gamma):
+        super().__init__(normalized)
         self.gamma = gamma
+        self.params['gamma'] = gamma
 
-    def __call__(self, X, Y):
+    cdef float _compute(self, np.ndarray[np.float_t, ndim=2] X, np.ndarray[np.float_t, ndim=2] Y):
         return np.exp(-self.gamma*euclidean_distances(X, Y)).sum()

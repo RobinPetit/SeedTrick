@@ -23,3 +23,6 @@ cdef class SVMKernel:
                 if j < N1:
                     ret[j, i] = x
         return ret
+
+    def get_kernel(self):
+        return self.kernel
