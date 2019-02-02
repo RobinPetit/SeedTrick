@@ -6,13 +6,14 @@ from numpy.distutils.core import setup as np_setup
 SUBPACKAGES = ['kernels', 'algo']
 
 SRC_FILES = [
+    # kernels
     (['kernels/base.c'], 'kernels.base'),
     (['kernels/string_kernels.c'], 'kernels.string_kernels'),
     (['kernels/svm_kernels.c'], 'kernels.svm_kernels'),
     (['kernels/basic.c'], 'kernels.basic'),
     (['kernels/mik.c'], 'kernels.mik'),
-    #
-    (['algo/suffixtree.c'], 'algo.suffixtree')
+    # algo
+    (['algo/suffixtree.c', 'algo/_suffixtree.c'], 'algo.suffixtree')
 ]
 
 libraries = ["m"]

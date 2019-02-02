@@ -14,5 +14,5 @@
 # TODO
 
 + [ ] Implement different normalizations (feature-space normalization, sample normalization, averaging, etc.)
-+ [ ] Turn `SeedTrick` into a standalone package
++ [x] Turn `SeedTrick` into a standalone package
 + [ ] Write a proper documentation
