@@ -1,0 +1,34 @@
+from libc.stdlib cimport malloc, free
+from libc.string cimport strcpy
+
+cdef class Edge:
+    cdef Suffix *_child
+    cdef char *_label
+    cdef unsigned int _label_length
+    cdef int _idx
+
+    cdef __cinit__(self, Suffix *child, char *label, unsigned int label_length, int idx=-1):
+        assert (child != NULL or idx < 0) and (child == NULL or idx >= 0)
+        self._child = child
+        self._label = label
+        self._label_length = label_length
+
+    cdef Suffix *get_child(self):
+        return self._child
+
+    cdef bint is_leaf(self):
+        return self._child != NULL
+
+cdef class Suffix:
+    cdef Edge _left_edge
+    cdef Edge _right_edge
+
+cdef class SuffixTree:
+    cdef char *_s
+
+    def __init__(self, str s):
+        self._s = <char *>malloc((len(s)+1) * sizeof(char))
+        strcpy(self._s, s.encode())
+
+    def __dealloc__(self):
+        free(self._s)

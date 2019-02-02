@@ -1,4 +1,4 @@
-# PipsTrick
+# SeedTrick
 
 `pipsTrick` is a Python/Cython package implementing several kernels intended for Support Vector Machines (SVM).
 
@@ -14,5 +14,5 @@
 # TODO
 
 + [ ] Implement different normalizations (feature-space normalization, sample normalization, averaging, etc.)
-+ [ ] Turn `PipsTrick` into a standalone package
++ [ ] Turn `SeedTrick` into a standalone package
 + [ ] Write a proper documentation

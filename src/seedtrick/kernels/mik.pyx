@@ -4,9 +4,9 @@ import numpy as np
 cimport numpy as np
 from libc cimport math
 
-from ._base cimport Kernel
-
 from sklearn.metrics.pairwise import euclidean_distances
+
+from seedtrick.kernels.base cimport Kernel
 
 cdef class MultiInstanceKernel:
     cdef bint normalized
@@ -26,6 +26,8 @@ cdef class MultiInstanceKernel:
 
     cdef float _compute(self, np.ndarray[np.float_t, ndim=2] x1, np.ndarray[np.float_t, ndim=2] x2):
         return -.11
+
+MIK = MultiInstanceKernel
 
 cdef class MinMaxKernel(MultiInstanceKernel):
     cdef float c, d
@@ -68,3 +70,4 @@ cdef class RBFSetKernel(MultiInstanceKernel):
 
     cdef float _compute(self, np.ndarray[np.float_t, ndim=2] X, np.ndarray[np.float_t, ndim=2] Y):
         return np.exp(-self.gamma*euclidean_distances(X, Y)).sum()
+

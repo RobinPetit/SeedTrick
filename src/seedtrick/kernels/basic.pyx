@@ -3,7 +3,7 @@
 import numpy as np
 cimport numpy as np
 
-from ._base cimport Kernel
+from seedtrick.kernels.base cimport Kernel
 
 cdef class RBFKernel(Kernel):
     cdef float gamma

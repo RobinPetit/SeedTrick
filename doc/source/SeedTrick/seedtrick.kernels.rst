@@ -1,0 +1,21 @@
+seedtrick.kernels package
+=========================
+
+.. automodule:: seedtrick.kernels
+    :members:
+    :private-members:
+    :show-inheritance:
+    :ignore-module-all:
+
+Submodules
+----------
+
+.. toctree::
+
+   seedtrick.kernels.base
+   seedtrick.kernels.basic
+   seedtrick.kernels.comik
+   seedtrick.kernels.mik
+   seedtrick.kernels.string_kernels
+   seedtrick.kernels.svm_kernels
+

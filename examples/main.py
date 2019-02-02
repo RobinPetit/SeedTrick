@@ -103,7 +103,7 @@ def main():
                 test_accuracy = (predictions == y_test).sum() / len(X_test)
                 print('\t\t\tKernel params:', clf.svm_kernel.get_kernel().get_params())
                 print('\t\tAccuracy (LOO on train set): \033[1m{:3.2f}%\033[0m'.format(100*loo_accuracy))
-                print('\t\tAccuracy (test set): \033[1m{:3.2f}\033[0m'.format(100*test_accuracy))
+                print('\t\tAccuracy (test set): \033[1m{:3.2f}%\033[0m'.format(100*test_accuracy))
         print('-'*40)
 
 if __name__ == '__main__':
