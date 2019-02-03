@@ -203,6 +203,8 @@ void free_kmer_suffix_tree(kmer_suffix_tree_t **s_t) {
 	_free((void **)s_t);
 }
 
+///// print tree
+
 static void _print_kmer_suffix_tree(const node_t *node, int nb_tabs) {
 	assert(!is_leaf(node));
 	unsigned int i;

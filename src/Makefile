@@ -7,4 +7,7 @@ build: setup.py
 clean:
 	rm -r build/
 
-.PHONY: build install clean
+rm:
+	rm -f seedtrick/**/[!_]*.c
+
+.PHONY: build install clean rm
