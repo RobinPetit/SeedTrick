@@ -13,7 +13,7 @@ SRC_FILES = [
     (['kernels/basic.c'], 'kernels.basic'),
     (['kernels/mik.c'], 'kernels.mik'),
     # algo
-    (['algo/suffixtree.c', 'algo/_suffixtree.c'], 'algo.suffixtree')
+    (['algo/suffixtree.c', 'algo/kmersuffixtree.c'], 'algo.suffixtree')
 ]
 
 libraries = ["m"]

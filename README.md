@@ -1,6 +1,6 @@
 # SeedTrick
 
-`pipsTrick` is a Python/Cython package implementing several kernels intended for Support Vector Machines (SVM).
+`SeedTrick` is a Python/Cython package implementing several kernels intended for Support Vector Machines (SVM).
 
 # Main References
 

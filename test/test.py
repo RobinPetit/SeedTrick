@@ -3,5 +3,5 @@ def test_imports():
 
 def test_suffix_tree():
     from seedtrick.algo import suffixtree
-    st = suffixtree.SuffixTree('banana')
+    st = suffixtree.SuffixTree('banananabanapa', 3)
     st.display()

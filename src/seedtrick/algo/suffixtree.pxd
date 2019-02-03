@@ -1,6 +1,8 @@
-cdef extern from "suffixtree.h":
-	ctypedef struct suffix_tree_t:
+cdef extern from "kmersuffixtree.h":
+
+	ctypedef struct kmer_suffix_tree_t:
 		pass
-	suffix_tree_t *create_suffix_tree(const char *)
-	void free_suffix_tree(suffix_tree_t **)
-	void print_suffix_tree(suffix_tree_t *)
+
+	kmer_suffix_tree_t *create_kmer_suffix_tree(const char *, unsigned int k)
+	void free_kmer_suffix_tree(kmer_suffix_tree_t **)
+	void print_kmer_suffix_tree(const kmer_suffix_tree_t *)
