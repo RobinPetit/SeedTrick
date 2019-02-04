@@ -1,1 +1,1 @@
-#from .suffixtree import *
+from .suffixtree import KmerSuffixTree

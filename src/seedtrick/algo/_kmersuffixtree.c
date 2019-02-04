@@ -49,14 +49,18 @@ static inline bool is_leaf(const node_t *node) {
 
 ///// Construction of Suffix Tree
 
-static int _insert_suffix_leaf(node_t *node, const char *suffix, unsigned int length, unsigned int idx) {
+static inline int _insert_edge(node_t *node, edge_t edge) {
 	edge_t *new_edges = realloc(node->edges, (node->nb_children+1)*sizeof(edge_t));
 	if(new_edges == NULL)
 		return -1;
 	node->edges = new_edges;
-	node->edges[node->nb_children] = _make_edge_to_leaf(suffix, length, idx);
+	node->edges[node->nb_children] = edge;
 	node->nb_children++;
 	return 0;
+}
+
+static inline int _insert_suffix_leaf(node_t *node, const char *suffix, unsigned int length, unsigned int idx) {
+	return _insert_edge(node, _make_edge_to_leaf(suffix, length, idx));
 }
 
 static void _add_node(edge_t *prev_edge, unsigned int nb_children) {
@@ -101,24 +105,21 @@ static void _insert_suffix_branch(node_t *node, const char *suffix, unsigned int
 		}
 	} while(length > 0 && !inserted && current_node != NULL && loop);
 	if(!loop) {
-		assert(substr_len < prev_edge->label_length);
-		int leaf_count0 = current_node->counts[0];
-		int leaf_count1 = current_node->counts[1];
-		_add_node(prev_edge, 2);
-		prev_edge->child->edges[0] = _make_edge_to_leaf(&prev_edge->label[substr_len], prev_edge->label_length - substr_len, idx);
-		prev_edge->child->edges[0].child->counts[0] = leaf_count0;
-		prev_edge->child->edges[0].child->counts[1] = leaf_count1;
-		prev_edge->child->edges[1] = _make_edge_to_leaf(suffix, length, idx); //, label_idx);
+		node_t *new_node = _make_empty_node();
+		_insert_suffix_leaf(new_node, suffix, length, idx);
+		edge_t intermediate_edge = _make_edge(current_node, &prev_edge->label[substr_len], prev_edge->label_length - substr_len);
+		_insert_edge(new_node, intermediate_edge);
 		prev_edge->label_length = substr_len;
+		prev_edge->child = new_node;
 	} else if(current_node == NULL) {
 		assert(substr_len == prev_edge->label_length && !inserted);
 		int leaf_count0 = current_node->counts[0];
 		int leaf_count1 = current_node->counts[1];
 		_add_node(prev_edge, 2);
-		prev_edge->child->edges[0] = _make_edge_to_leaf(suffix, 0, idx); //, idx_leaf);
+		prev_edge->child->edges[0] = _make_edge_to_leaf(suffix, 0, idx);
 		prev_edge->child->edges[0].child->counts[0] = leaf_count0;
 		prev_edge->child->edges[0].child->counts[1] = leaf_count1;
-		prev_edge->child->edges[1] = _make_edge_to_leaf(suffix, length, idx); //, label_idx);
+		prev_edge->child->edges[1] = _make_edge_to_leaf(suffix, length, idx);
 	} else if(length == 0) {
 		current_node->counts[idx]++;
 	}
