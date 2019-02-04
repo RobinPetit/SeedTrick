@@ -1,5 +1,7 @@
 #cython:language_level=3
+
 from libc cimport math
+
 cimport numpy as np
 import numpy as np
 
@@ -7,8 +9,7 @@ cdef class StringSubsequenceKernel:
     r'''
     Implementation of the String Subsequence Kernel (SSK) defined in [1].
 
-    Definition
-    ----------
+    **Definition**
 
     Let :math:`\Sigma` be an alphabet. For :math:`n \geq 0`, let :math:`\Sigma^n` be the
     set of all finite strings of length :math:`n` on :math:`\Sigma`.
@@ -19,12 +20,10 @@ cdef class StringSubsequenceKernel:
         \mathsf{SSK}_N : \Sigma^* \times \Sigma^* \to \mathbb R^+ :
         (s, t) \mapsto \sum_{u \in \Sigma^N}\sum_{\mathbf i : u = s[\mathbf i]}\sum_{\mathbf j : u = t[\mathbf j]}\lambda^{\ell(\mathbf i) + \ell(\mathbf j)}
 
-    References
-    ----------
-
-    [1] Lodhi, H., Saunders, C., Shawe-Taylor, J., Cristianini, N., & Watkins, C. (2002).
-    Text classification using string kernels. Journal of Machine Learning Research, 2(Feb), 419-444.
-    https://papers.nips.cc/paper/1869-text-classification-using-string-kernels.pdf
+    References:
+        [1] Lodhi, H., Saunders, C., Shawe-Taylor, J., Cristianini, N., & Watkins, C. (2002).
+        Text classification using string kernels. Journal of Machine Learning Research, 2(Feb), 419-444.
+        https://papers.nips.cc/paper/1869-text-classification-using-string-kernels.pdf
     '''
 
     cdef unsigned int N

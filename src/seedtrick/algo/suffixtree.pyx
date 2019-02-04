@@ -3,11 +3,13 @@
 cimport libc.stdlib
 
 cdef class KmerSuffixTree:
+    r'''
+
+    '''
     def __init__(self, str s, str t, unsigned int k):
         self._s_t = create_kmer_suffix_tree(
             s.encode('ascii'), t.encode('ascii'), k
         )
-        #self.display()
 
     def display(self):
         print_kmer_suffix_tree(self._s_t)

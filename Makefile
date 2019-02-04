@@ -8,7 +8,7 @@ build:
 	make -C src/ build
 
 doc: build
-	export SPHINX_APIDOC_OPTIONS=members,private-members,show-inheritance,ignore-module-all && \
+	export SPHINX_APIDOC_OPTIONS=members,show-inheritance,ignore-module-all && \
 	sphinx-apidoc -Mef -o doc/source/SeedTrick src/seedtrick/ src/seedtrick/setup.py
 	make -C doc/ html
 

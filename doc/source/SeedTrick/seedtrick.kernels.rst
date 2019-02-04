@@ -3,7 +3,6 @@ seedtrick.kernels package
 
 .. automodule:: seedtrick.kernels
     :members:
-    :private-members:
     :show-inheritance:
     :ignore-module-all:
 
