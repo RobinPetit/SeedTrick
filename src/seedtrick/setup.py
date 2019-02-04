@@ -12,6 +12,7 @@ SRC_FILES = [
     (['kernels/svm_kernels.c'], 'kernels.svm_kernels'),
     (['kernels/basic.c'], 'kernels.basic'),
     (['kernels/mik.c'], 'kernels.mik'),
+    (['kernels/spectrum.c'], 'kernels.spectrum'),
     # algo
     (['algo/suffixtree.c', 'algo/_kmersuffixtree.c'], 'algo.suffixtree')
 ]
@@ -28,7 +29,7 @@ for paths, ext_name in SRC_FILES:
     config.add_extension(
         ext_name,
         sources=sources,
-        include_dirs=include_dirs+[os.curdir],
+        include_dirs=include_dirs+[os.curdir] + SUBPACKAGES,
         libraries=libraries,
     )
 
