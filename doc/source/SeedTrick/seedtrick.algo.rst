@@ -7,3 +7,10 @@ seedtrick.algo package
     :show-inheritance:
     :ignore-module-all:
 
+Submodules
+----------
+
+.. toctree::
+
+   seedtrick.algo.suffixtree
+
