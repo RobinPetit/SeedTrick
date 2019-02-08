@@ -15,6 +15,7 @@ Submodules
    seedtrick.kernels.basic
    seedtrick.kernels.comik
    seedtrick.kernels.mik
+   seedtrick.kernels.odh
    seedtrick.kernels.spectrum
    seedtrick.kernels.string_kernels
    seedtrick.kernels.svm_kernels

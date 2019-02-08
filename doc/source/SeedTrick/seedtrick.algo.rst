@@ -11,5 +11,6 @@ Submodules
 
 .. toctree::
 
+   seedtrick.algo.odh
    seedtrick.algo.suffixtree
 
