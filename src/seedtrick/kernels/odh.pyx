@@ -34,16 +34,37 @@ cdef object _compute_X(const char **strings, unsigned int nb_strings, unsigned i
                 counts[k, _kmer_to_idx(&strings[k][i], K)*M*D + _kmer_to_idx(&strings[k][j], K)*D + i-j] += 1
     return counts
 
-cdef void _normalize_array(np.float_t[:,:] K, unsigned int N):
+cdef void _normalize_array_XX(np.float_t[:,:] K, unsigned int N):
     cdef unsigned int i, j
     cdef np.float_t *norms = <np.float_t *>malloc(N * sizeof(np.float_t))
     for i in range(N):
         norms[i] = <np.float_t>sqrt(K[i,i])
     for i in range(N):
-
         for j in range(N):
             K[i,j] / (norms[i]*norms[j])
     free(norms)
+
+cdef object _get_count_matrix(list X, unsigned int K):
+    cdef unsigned int N_X = len(X)
+    cdef char **strings_X = <char **>malloc(N_X * sizeof(char *))
+    for i in range(N_X):
+        strings_X[i] = <char *>malloc((len(X[i])+1) * sizeof(char))
+        strcpy(strings_X[i], X[i].encode('ASCII'))
+    ret = _compute_X(strings_X, N_X, K)
+    for i in range(N_X):
+        free(strings_X[i])
+    free(strings_X)
+    return ret
+
+cdef void _normalize_rows(counts):
+    #assert isinstance(counts, csr_matrix)
+    cdef unsigned int N = counts.shape[0]
+    coo = counts.tocoo()
+    norms = np.zeros(N, dtype=np.float)
+    for (i, j, count) in zip(coo.row, coo.col, coo.data):
+        norms[i] += count*count
+    for (i, j) in zip(coo.row, coo.col):
+        counts[i, j] /= norms[i]
 
 cdef class ODHKernel(Kernel):
     r'''
@@ -83,21 +104,21 @@ cdef class ODHKernel(Kernel):
     def __call__(self, X, Y):
         pass
 
-    def get_K_matrix(self, X):
+    def get_K_matrix(self, X, Y):
         r'''
-        Get the matrix :math:`\mathbf K` where :math:`K_{ij} = \langle \Phi(X_i), \Phi(X_j) \rangle`.
+        Get the matrix :math:`\mathbf K` where :math:`K_{ij} = \langle \Phi(X_i), \Phi(Y_j) \rangle`.
         '''
-        cdef unsigned int N = len(X)
-        cdef char **strings = <char **>malloc(N * sizeof(char *))
-        cdef unsigned int i
-        for i in range(N):
-            strings[i] = <char *>malloc((len(X[i])+1) * sizeof(char))
-            strcpy(strings[i], X[i].encode('ASCII'))
-        counts = _compute_X(strings, N, self.k)
-        for i in range(N):
-            free(strings[i])
-        free(strings)
-        ret = (counts * counts.T).toarray()
-        if self.normalized:
-            _normalize_array(ret, N)
+        cdef bint Y_is_None = Y is None or X is Y
+        counts_X = _get_count_matrix(X, self.k)
+        if Y is None:
+            ret = counts_X * counts_X.T
+            if self.normalized:
+                _normalize_array_XX(ret, len(X))
+        else:
+            counts_Y = _get_count_matrix(Y, self.k)
+            if self.normalized:
+                _normalize_rows(counts_X)
+                _normalize_rows(counts_Y)
+            ret = counts_X * counts_Y.T
         return ret
+
