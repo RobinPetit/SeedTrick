@@ -66,6 +66,7 @@ def test_mik():
     neg_examples = _fasta_reader(DIR + '/neg.fasta')[:10]
     assert set(''.join(pos_examples + neg_examples)) == set('ATCG')
     comik = CoMIK(3)
+    print('{} pos examples and {} neg examples'.format(len(pos_examples), len(neg_examples)))
     X = np.array(pos_examples + neg_examples)
     y = np.zeros(len(X), dtype=np.int)
     y[:len(pos_examples)] = +1

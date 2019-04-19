@@ -16,13 +16,13 @@ cdef inline double _squared_norm_ell2_sparse(object v):
 
 cdef np.ndarray pairwise_distances(object X, object Y):
     cdef int i, j
+    if X is Y:
+        print('Should optimize pairwise_distances to be more efficient if `X is Y`')
     ret = np.zeros((X.shape[0], Y.shape[0]), dtype=np.float)
     for i in range(X.shape[0]):
-        for j in range(i+1, Y.shape[0]):
-            tmp = X[i]-Y[j]
+        for j in range(Y.shape[0]):
+            tmp = X.getrowview(i)-Y.getrowview(j)
             ret[i,j] = _squared_norm_ell2_sparse(tmp)
-            if j < X.shape[0] and i < Y.shape[0]:
-                ret[j, i] = ret[i, j]
     return ret
 
 # TODO: optimize this a bit
@@ -51,9 +51,10 @@ cdef object kmeans_sparse(object samples, int n_clusters, int max_iter=20, bint 
             print('[kmeans] Iteration', iter_count)
         for i in range(n_clusters):  # ith cluster
             indices = np.where((clusters == i))[0]
-            centroids[i,centroids[i].nonzero()[1]] = 0
+            centroids.data[i] = [0.]*len(centroids.data[i])
+            #centroids[i,centroids[i].nonzero()[1]] = 0
             for j in indices:  # jth sample related to ith cluster
-                nonzero_indices = samples[j].nonzero()[1]
+                nonzero_indices = samples.getrowview(j).nonzero()[1]
                 for k in range(len(nonzero_indices)):  # kth coordinate of jth sample
                     centroids[i, nonzero_indices[k]] += samples[j, nonzero_indices[k]]
             centroids.data[i] = list(np.asarray(centroids.data[i]) / len(indices))
@@ -64,7 +65,7 @@ cdef object kmeans_sparse(object samples, int n_clusters, int max_iter=20, bint 
     return clusters, centroids
 
 cdef class Bag:
-    cdef object bag
+    cdef str bag
     cdef object odh_bag
     cdef np.ndarray indices
     cdef np.ndarray lengths
@@ -75,7 +76,7 @@ cdef class Bag:
         cdef int nb_chars = len(sequence)
         cdef unsigned int nb_instances_non_shift = <unsigned int>ceil(nb_chars / instance_size)
         cdef unsigned int nb_instances_shift = 0
-        self.bag = sequence
+        self.bag = str(sequence)
         if shift:
             nb_instances_shift = <unsigned int>ceil((nb_chars - instance_size//2) / instance_size)
         self.nb_instances = nb_instances_shift + nb_instances_non_shift
@@ -112,6 +113,9 @@ cdef class Bag:
         for i in range(self.odh_bag.shape[0]):
             yield self.odh_bag[i]
 
+    def get_bag(self):
+        return self.odh_bag
+
     def __iter__(self):
         for idx, length in zip(self.indices, self.lengths):
             yield self.bag[idx:idx+length]
@@ -143,16 +147,18 @@ cdef class CoMIK(MikSvm):
     cdef np.ndarray subkernels
     cdef float tau
     cdef float sigma
+    cdef float C
     cdef np.ndarray subkernel_weights
-    #cdef np.ndarray alpha
+    cdef np.ndarray alpha
 
-    def __init__(self, unsigned int k, unsigned int segment_size=50, unsigned int nb_exp_points=10, float tau=1e-2, float sigma=10):
+    def __init__(self, unsigned int k, unsigned int segment_size=50, unsigned int nb_exp_points=10, float tau=1, float sigma=25, float C=1):
         self.nb_exp_points = nb_exp_points
         self.k = k
         self.segment_size = segment_size
         self.odh = ODHKernel(k, True, False, segment_size)
         self.tau = tau
         self.sigma = sigma
+        self.C = C
 
     def fit(self, np.ndarray X, np.ndarray[np.int_t] y):
         '''
@@ -161,18 +167,16 @@ cdef class CoMIK(MikSvm):
         cdef int i
         vector_X = self.odh.vectorize(X, lil=True)
         # Find the centroids
-        _, self.centroids = kmeans_sparse(samples=vector_X, n_clusters=self.nb_exp_points, max_iter=30, verbose=True, heuristic=True)
+        _, self.centroids = kmeans_sparse(samples=vector_X, n_clusters=self.nb_exp_points, max_iter=50, verbose=True, heuristic=True)
         # Split instances into bags
         bags = baggify(X, self.segment_size, True)
         for bag in bags:
             bag.vectorize(self.odh)
         # compute subkernels
         shape = (self.nb_exp_points, X.shape[0], X.shape[0])
-        self.subkernels = np.empty(shape, dtype=np.double)
-        for i, bag1 in enumerate(bags):
-            for j, bag2 in enumerate(bags):
-                for e in range(self.nb_exp_points):
-                    self.subkernels[e, i, j] = self._compute_subkernel(bag1, bag2, self.centroids[e])
+        self.subkernels = np.zeros(shape, dtype=np.double)
+        print('Computing subkernels')
+        self._compute_subkernels(bags)
         '''
         TODO: if at some point shogun stops producing segfaults...
         self.kernels = shogun.CombinedKernel()
@@ -185,13 +189,46 @@ cdef class CoMIK(MikSvm):
         self.multi_kernel.set_labels(shogun.BinaryLabels(y))
         self.multi_kernel.train()
         '''
+        print('Optimizing')
         self._optimize(y)
+
+    cdef void _compute_subkernels(self, Bag[:] bags):
+        cdef int n_bags = bags.shape[0]
+        cdef int i, j, k, ell, e, t, tmp
+        cdef double prod
+        cdef np.ndarray conformal_multipliers = np.empty((n_bags, self.nb_exp_points), dtype=object)
+        cdef object bag_instances_i, bag_instances_j
+        cdef object bag
+        for i in range(n_bags):
+            bag_instances_i = bags[i].get_bag()
+            for e in range(self.nb_exp_points):
+                conformal_multipliers[i,e] = list()
+                for j in range(bag_instances_i.shape[0]):
+                    conformal_multipliers[i,e].append(self._conformal_ker(bag_instances_i.getrowview(j), self.centroids.getrowview(e)))
+        for i in range(n_bags):
+            bag_instances_i = bags[i].get_bag()
+            for j in range(i, n_bags):
+                bag_instances_j = bags[j].get_bag()
+                for k in range(bag_instances_i.shape[0]):
+                    for ell in range(bag_instances_j.shape[0]):
+                        prod = 0
+                        for t in bag_instances_i.rows[k]:
+                            prod += bag_instances_i[k,t]*bag_instances_j[ell,t]
+                        if prod == 0:
+                            continue
+                        for e in range(self.nb_exp_points):
+                            tmp = conformal_multipliers[i,e][k]*conformal_multipliers[j,e][ell]*prod
+                            if tmp == 0:
+                                continue
+                            self.subkernels[e,i,j] += tmp
+                            if i != j:
+                                self.subkernels[e,j,i] += tmp
+                self.subkernels[:,i,j] /= len(bags[i])*len(bags[j])
 
     cdef void _optimize(self, np.ndarray[np.int_t, ndim=1] y):
         cdef unsigned int n = y.shape[0]
         cdef np.ndarray weighted_kernels = y.reshape(-1, 1) * self.subkernels * y
         cdef np.ndarray traces = np.trace(self.subkernels, 1, 2)
-        cdef float C = n / 2.
         cdef unsigned int i
         _tau = cp.Parameter(nonneg=True)
         c = cp.Parameter(nonneg=True)
@@ -200,10 +237,13 @@ cdef class CoMIK(MikSvm):
         zeta = cp.Variable(nonneg=True)
         alphas = cp.Variable(n, nonneg=True)
         obj = cp.Maximize(2*cp.sum(alphas) - _tau*cp.pnorm(alphas, p=2) - c*zeta)
-        constraints = [alphas <= C, alphas.T @ y == 0]
+        assert obj.is_dcp(), "objective is not DCP"
+        constraints = [alphas <= self.C, alphas.T @ y == 0]
         eta_starting_idx = len(constraints)
         for i in range(self.nb_exp_points):
             constraints += [traces[i]*zeta >= cp.quad_form(alphas, weighted_kernels[i])]
+        for i, c in enumerate(constraints):
+            assert c.is_dcp(), "constraint {} is not DCP".format(c)
         prob = cp.Problem(obj, constraints)
         try:
             prob.solve(verbose=False)
@@ -213,19 +253,16 @@ cdef class CoMIK(MikSvm):
         self.subkernel_weights = np.array([c.dual_value.flatten()[0] for c in prob.constraints[eta_starting_idx:]])
         # renormalise weights
         self.subkernel_weights /= sqrt(self.subkernel_weights.dot(self.subkernel_weights))
-
-    cdef inline double _compute_subkernel(self, Bag bag1, Bag bag2, object centroid):
-        cdef double mul_x = 0
-        cdef double mul_x_prime = 0
-        cdef double prod = 0
-        for x in bag1.instances():
-            mul_x = self.rbf(_squared_norm_ell2_sparse(x-centroid))
-            for x_prime in bag2.instances():
-                mul_x_prime = self.rbf(_squared_norm_ell2_sparse(x_prime-centroid))
-                for j in set(x.nonzero()[1]) & set(x_prime.nonzero()[1]):
-                    prod += x[0,j]*x_prime[0,j]
-                return mul_x * mul_x_prime * prod / (len(bag1) * len(bag2))
+        self.alpha = np.asarray(alphas.value)
+        # TODO: Meh?
+        print('theta:', self.subkernel_weights)
+        print('alpha\' y:', self.alpha.dot(y))
+        print('alpha:', self.alpha)
+        print('b:', prob.constraints[1].dual_value)
 
     cdef inline double rbf(self, double norm):
         norm /= 2*self.sigma*self.sigma
         return exp(-norm)
+
+    cdef inline double _conformal_ker(self, object x, object c_e):
+        return self.rbf(_squared_norm_ell2_sparse(x-c_e))
