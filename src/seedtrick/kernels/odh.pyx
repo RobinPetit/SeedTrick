@@ -3,35 +3,39 @@
 import numpy as np
 cimport numpy as np
 
-from libc.string cimport strlen, strcpy
+from libc.string cimport strlen, strncpy, strcpy
 from libc.stdlib cimport malloc, free
-from libc.stdio cimport printf
 from libc.math cimport pow, sqrt
 
 from seedtrick.kernels.base cimport Kernel
 
 # Need a sparse matrix to store the matrix of projections X = [\Phi(S_i)]_i
 # that is only 1 in 20^(2k) dense
-from scipy.sparse import csr_matrix
-SparseMatrix = csr_matrix
+from scipy.sparse import csr_matrix, lil_matrix
+SparseMatrix = lil_matrix
 
-cdef object _compute_X(const char **strings, unsigned int nb_strings, unsigned int K):
+cdef object _compute_X(const char **strings, unsigned int nb_strings, unsigned int K, int max_dist, kmer2idx_t kmer2idx):
     cdef unsigned int L_max = 0
     cdef unsigned int i, j, k, d
     cdef unsigned int N
-    cdef unsigned int D, M = <unsigned int>pow(20, K)
+    cdef unsigned int D, M = <unsigned int>pow(20, K) if kmer2idx == _kmer_to_idx_aa else <unsigned int>pow(4, K)
     cdef unsigned int latent_dimensions
-    for i in range(nb_strings):
-        N = strlen(strings[i])
-        if N > L_max:
-            L_max = N
-    D = L_max - K + 1
+    if max_dist < 0:
+        for i in range(nb_strings):
+            N = strlen(strings[i])
+            if N > L_max:
+                L_max = N
+        D = L_max - K + 1
+    else:
+        D = <unsigned int>max_dist
     latent_dimensions = D*M*M
     counts = SparseMatrix((nb_strings, latent_dimensions), dtype=np.float)
     for k in range(nb_strings):
         for i in range(strlen(strings[k])-K+1):
             for j in range(i, strlen(strings[k])-K+1):
-                counts[k, _kmer_to_idx(&strings[k][i], K)*M*D + _kmer_to_idx(&strings[k][j], K)*D + i-j] += 1
+                if i-j >= D:
+                    break
+                counts[k, kmer2idx(&strings[k][i], K)*M*D + kmer2idx(&strings[k][j], K)*D + i-j] += 1
     return counts
 
 cdef void _normalize_array_XX(np.float_t[:,:] K, unsigned int N):
@@ -44,20 +48,26 @@ cdef void _normalize_array_XX(np.float_t[:,:] K, unsigned int N):
             K[i,j] / (norms[i]*norms[j])
     free(norms)
 
-cdef object _get_count_matrix(list X, unsigned int K):
-    cdef unsigned int N_X = len(X)
+cdef object _get_count_matrix(list X, unsigned int K, int max_dist, bint aa):
+    cdef unsigned int N_X = len([x for x in X if len(x) >= K])
+    cdef kmer2idx_t kmer2idx =  &_kmer_to_idx_aa if aa else &_kmer_to_idx_nt
     cdef char **strings_X = <char **>malloc(N_X * sizeof(char *))
-    for i in range(N_X):
-        strings_X[i] = <char *>malloc((len(X[i])+1) * sizeof(char))
-        strcpy(strings_X[i], X[i].encode('ASCII'))
-    ret = _compute_X(strings_X, N_X, K)
+    cdef int i, j
+    j = 0
+    for i in range(len(X)):
+        if len(X[i]) < K:
+            continue
+        strings_X[j] = <char *>malloc((len(X[i])+1) * sizeof(char))
+        strcpy(strings_X[j], X[i].encode('ASCII'))
+        j += 1
+    assert j == N_X
+    ret = _compute_X(strings_X, N_X, K, max_dist, kmer2idx)
     for i in range(N_X):
         free(strings_X[i])
     free(strings_X)
     return ret
 
 cdef void _normalize_rows(counts):
-    #assert isinstance(counts, csr_matrix)
     cdef unsigned int N = counts.shape[0]
     coo = counts.tocoo()
     norms = np.zeros(N, dtype=np.float)
@@ -95,30 +105,53 @@ cdef class ODHKernel(Kernel):
         [1] Lingner, T., & Meinicke, P. (2006).
         Remote homology detection based on oligomer distances. Bioinformatics, 22(18), 2224-2231.
     '''
-    cdef unsigned int k
-    cdef bint normalized
-    def __init__(self, unsigned int k, bint normalized):
+    def __init__(self, unsigned int k, bint normalized, bint aa, int max_dist=-1):
         self.k = k
         self.normalized = normalized
+        self.max_dist = max_dist
+        self.aa = aa
 
     def __call__(self, X, Y):
-        pass
+        '''
+        See :meth:`get_K_matrix`.
+        '''
+        return self.get_K_matrix(X, Y)
 
     def get_K_matrix(self, X, Y):
         r'''
         Get the matrix :math:`\mathbf K` where :math:`K_{ij} = \langle \Phi(X_i), \Phi(Y_j) \rangle`.
+
+        Args:
+            X (list):
+                list of strings.
+            Y (list):
+                list of strings (or ``None`` if ``Y = X``).
+
+        Return:
+            np.ndarray:
+                Kernel matrix
         '''
         cdef bint Y_is_None = Y is None or X is Y
-        counts_X = _get_count_matrix(X, self.k)
-        if Y is None:
+        counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa)
+        if Y_is_None:
             ret = counts_X * counts_X.T
             if self.normalized:
                 _normalize_array_XX(ret, len(X))
         else:
-            counts_Y = _get_count_matrix(Y, self.k)
+            counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa)
             if self.normalized:
                 _normalize_rows(counts_X)
                 _normalize_rows(counts_Y)
             ret = counts_X * counts_Y.T
         return ret
 
+    cdef double single_instance(self, str x, str x_prime):
+        return (_get_count_matrix([x], self.k, self.max_dist, self.aa).dot(_get_count_matrix([x_prime], self.k, self.max_dist, self.aa).T))[0,0]
+
+    cdef object vectorize(self, seqs, bint lil):
+        if not isinstance(seqs, list):
+            seqs = list(seqs)
+        ret = _get_count_matrix(seqs, self.k, self.max_dist, self.aa)
+        if lil and not isinstance(ret, lil_matrix):
+            ret = ret.tolil()
+        return ret

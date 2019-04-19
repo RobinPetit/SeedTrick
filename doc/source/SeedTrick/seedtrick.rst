@@ -13,4 +13,5 @@ Subpackages
 
     seedtrick.algo
     seedtrick.kernels
+    seedtrick.svm
 

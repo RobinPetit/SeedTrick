@@ -3,7 +3,7 @@ import os
 from numpy.distutils.misc_util import Configuration
 from numpy.distutils.core import setup as np_setup
 
-SUBPACKAGES = ['kernels', 'algo']
+SUBPACKAGES = ['kernels', 'algo', 'svm']
 
 SRC_FILES = [
     # kernels
@@ -16,7 +16,9 @@ SRC_FILES = [
     (['kernels/odh.c', 'algo/_odh.c'], 'kernels.odh'),
     # algo
     (['algo/suffixtree.c', 'algo/_kmersuffixtree.c'], 'algo.suffixtree'),
-    (['algo/odh.c', 'algo/_odh.c'], 'algo.odh'),
+    # svm
+    (['svm/miksvm.c'], 'svm.miksvm'),
+    (['svm/comik.c'], 'svm.comik'),
 ]
 
 libraries = ["m"]

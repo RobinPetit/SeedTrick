@@ -3,6 +3,8 @@
 
 static const unsigned int NB_AMINO_ACIDS = 20;
 
+typedef unsigned int (*kmer2idx_t)(const char *, unsigned int);
+
 static const int _aa_to_int[26] = {
 	 1,  //'A',
 	-1,  //'B',
@@ -32,6 +34,7 @@ static const int _aa_to_int[26] = {
 	-1,  //'Z'
 };
 
-unsigned int _kmer_to_idx(const char *, unsigned int);
+unsigned int _kmer_to_idx_aa(const char *, unsigned int);
+unsigned int _kmer_to_idx_nt(const char *, unsigned int);
 
 #endif

@@ -10,7 +10,7 @@ from numpy.distutils.core import setup as np_setup
 from glob import glob
 import os.path
 
-SUBMODULE_DIRS = ['kernels/', 'algo/']
+SUBMODULE_DIRS = ['kernels/', 'algo/', 'svm/']
 
 def configuration(parent_package='', top_path=None):
     config = Configuration(None, parent_package, top_path)
