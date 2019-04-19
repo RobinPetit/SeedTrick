@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>seedtrick.kernels.spectrum module &mdash; SeedTrick Nope documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="seedtrick.kernels.string_kernels module" href="seedtrick.kernels.string_kernels.html" />
+    <link rel="prev" title="seedtrick.kernels.odh module" href="seedtrick.kernels.odh.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SeedTrick
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">seedtrick</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="seedtrick.html">seedtrick package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="seedtrick.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="seedtrick.algo.html">seedtrick.algo package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="seedtrick.kernels.html">seedtrick.kernels package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="seedtrick.svm.html">seedtrick.svm package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SeedTrick</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">seedtrick</a> &raquo;</li>
+        
+          <li><a href="seedtrick.html">seedtrick package</a> &raquo;</li>
+        
+          <li><a href="seedtrick.kernels.html">seedtrick.kernels package</a> &raquo;</li>
+        
+      <li>seedtrick.kernels.spectrum module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/SeedTrick/seedtrick.kernels.spectrum.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-seedtrick.kernels.spectrum">
+<span id="seedtrick-kernels-spectrum-module"></span><h1>seedtrick.kernels.spectrum module<a class="headerlink" href="#module-seedtrick.kernels.spectrum" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="seedtrick.kernels.spectrum.SpectrumKernel">
+<em class="property">class </em><code class="descclassname">seedtrick.kernels.spectrum.</code><code class="descname">SpectrumKernel</code><span class="sig-paren">(</span><em>k</em>, <em>bool normalized</em><span class="sig-paren">)</span><a class="headerlink" href="#seedtrick.kernels.spectrum.SpectrumKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seedtrick.kernels.base.html#seedtrick.kernels.base.Kernel" title="seedtrick.kernels.base.Kernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">seedtrick.kernels.base.Kernel</span></code></a></p>
+<p>Implementation of the <span class="math notranslate nohighlight">\(k\)</span>-Spectrum Kernel defined in [1]</p>
+<p><strong>Definition</strong></p>
+<p>Let <span class="math notranslate nohighlight">\(\Sigma\)</span> be an alphabet (typically the set of Amino Acids). For <span class="math notranslate nohighlight">\(k &gt; 0\)</span>,
+let <span class="math notranslate nohighlight">\(\Phi\)</span> be the mapping:</p>
+<div class="math notranslate nohighlight">
+\[\Phi^k : \Sigma^* \to {\mathbb N}^{|\Sigma|^k} : s \mapsto (\phi_a^k(s))_{a \in \Sigma^k},\]</div>
+<p>where for every <span class="math notranslate nohighlight">\(a \in \Sigma^k\)</span>, <span class="math notranslate nohighlight">\(\phi_a^k\)</span> is the mapping:</p>
+<div class="math notranslate nohighlight">
+\[\phi_a^k : \Sigma^* \to \mathbb N : s \mapsto \left|\left\{i \in \{1, \ldots, |s|-k+1\} : s_is_{i+1}\ldots s_{i+k-1} = a\right\}\right|.\]</div>
+<p>The <span class="math notranslate nohighlight">\(k\)</span>-Spectrum Kernel is then defined by:</p>
+<div class="math notranslate nohighlight">
+\[\kappa_k : \Sigma^* \times \Sigma^* \to \mathbb R : (s, t) \mapsto \langle \Phi^k(s), \Phi^k(t) \rangle.\]</div>
+<p class="rubric">References</p>
+<p>[1] Leslie, C., Eskin, E., &amp; Noble, W. S. (2001).
+The spectrum kernel: A string kernel for SVM protein classification. In Biocomputing 2002 (pp. 564-575).</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="seedtrick.kernels.string_kernels.html" class="btn btn-neutral float-right" title="seedtrick.kernels.string_kernels module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="seedtrick.kernels.odh.html" class="btn btn-neutral" title="seedtrick.kernels.odh module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Robin Petit
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>seedtrick.kernels.odh module &mdash; SeedTrick Nope documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="seedtrick.kernels.spectrum module" href="seedtrick.kernels.spectrum.html" />
+    <link rel="prev" title="seedtrick.kernels.mik module" href="seedtrick.kernels.mik.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SeedTrick
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">seedtrick</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="seedtrick.html">seedtrick package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="seedtrick.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="seedtrick.algo.html">seedtrick.algo package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="seedtrick.kernels.html">seedtrick.kernels package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="seedtrick.svm.html">seedtrick.svm package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SeedTrick</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">seedtrick</a> &raquo;</li>
+        
+          <li><a href="seedtrick.html">seedtrick package</a> &raquo;</li>
+        
+          <li><a href="seedtrick.kernels.html">seedtrick.kernels package</a> &raquo;</li>
+        
+      <li>seedtrick.kernels.odh module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/SeedTrick/seedtrick.kernels.odh.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-seedtrick.kernels.odh">
+<span id="seedtrick-kernels-odh-module"></span><h1>seedtrick.kernels.odh module<a class="headerlink" href="#module-seedtrick.kernels.odh" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="seedtrick.kernels.odh.ODHKernel">
+<em class="property">class </em><code class="descclassname">seedtrick.kernels.odh.</code><code class="descname">ODHKernel</code><span class="sig-paren">(</span><em>unsigned int k</em>, <em>bool normalized</em>, <em>bool aa</em>, <em>int max_dist=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#seedtrick.kernels.odh.ODHKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="seedtrick.kernels.base.html#seedtrick.kernels.base.Kernel" title="seedtrick.kernels.base.Kernel"><code class="xref py py-class docutils literal notranslate"><span class="pre">seedtrick.kernels.base.Kernel</span></code></a></p>
+<p>Implementation of the Oligomer Distance Histogram (ODH) Kernel from [1].</p>
+<p><strong>Definition</strong></p>
+<p>Let <span class="math notranslate nohighlight">\(\Sigma\)</span> be an alphabet. For <span class="math notranslate nohighlight">\(K &gt; 0\)</span>, for <span class="math notranslate nohighlight">\(\mathcal D \subset \Sigma^*\)</span>, let
+<span class="math notranslate nohighlight">\(L_{\max} := \max_{u \in \mathcal D}|u|\)</span>, <span class="math notranslate nohighlight">\(\Xi := \Sigma^K\)</span> the set of <span class="math notranslate nohighlight">\(K\)</span>-mers
+(ordered <span class="math notranslate nohighlight">\(m_i, i=1, \ldots, M\)</span> for <span class="math notranslate nohighlight">\(M := |\Xi| = |\Sigma|^K\)</span>) and <span class="math notranslate nohighlight">\(D := L_{\max}-K\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\Phi : \Sigma^* \to \Sigma^{(D+1)M^2} : s \mapsto [h_{ij}^d(s)]_{(i, j, d)=(1, 1, 0)}^{(M, M, D)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(h_{ij}^d(s)\)</span> is the number of couples <span class="math notranslate nohighlight">\((\alpha, \beta), \alpha \leq \beta\)</span> such that:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}(i)   \quad &amp;s_{\alpha \ldots \alpha+K} &amp;= m_i, \\
+(ii)  \quad &amp;s_{\beta \ldots \beta+K} &amp;= m_j, \\
+(iii) \quad &amp;\beta-\alpha &amp;= d.\end{split}\]</div>
+<p>The kernel is then given by:</p>
+<div class="math notranslate nohighlight">
+\[\kappa_K : \Sigma^* \times \Sigma^* \to \mathbb R : (u, v) \mapsto \langle \Phi(u), \Phi(v) \rangle\]</div>
+<p class="rubric">References</p>
+<p>[1] Lingner, T., &amp; Meinicke, P. (2006).
+Remote homology detection based on oligomer distances. Bioinformatics, 22(18), 2224-2231.</p>
+<dl class="method">
+<dt id="seedtrick.kernels.odh.ODHKernel.get_K_matrix">
+<code class="descname">get_K_matrix</code><span class="sig-paren">(</span><em>self</em>, <em>X</em>, <em>Y</em><span class="sig-paren">)</span><a class="headerlink" href="#seedtrick.kernels.odh.ODHKernel.get_K_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the matrix <span class="math notranslate nohighlight">\(\mathbf K\)</span> where <span class="math notranslate nohighlight">\(K_{ij} = \langle \Phi(X_i), \Phi(Y_j) \rangle\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of strings.</li>
+<li><strong>Y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of strings (or <code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">Y</span> <span class="pre">=</span> <span class="pre">X</span></code>).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Kernel matrix</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="seedtrick.kernels.spectrum.html" class="btn btn-neutral float-right" title="seedtrick.kernels.spectrum module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="seedtrick.kernels.mik.html" class="btn btn-neutral" title="seedtrick.kernels.mik module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Robin Petit
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
