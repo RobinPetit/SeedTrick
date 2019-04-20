@@ -195,7 +195,7 @@ cdef class CoMIK(MikSvm):
     cdef void _compute_subkernels(self, Bag[:] bags):
         cdef int n_bags = bags.shape[0]
         cdef int i, j, k, ell, e, t, tmp
-        cdef double prod
+        cdef double prod, div
         cdef np.ndarray conformal_multipliers = np.empty((n_bags, self.nb_exp_points), dtype=object)
         cdef object bag_instances_i, bag_instances_j
         cdef object bag
@@ -223,7 +223,10 @@ cdef class CoMIK(MikSvm):
                             self.subkernels[e,i,j] += tmp
                             if i != j:
                                 self.subkernels[e,j,i] += tmp
-                self.subkernels[:,i,j] /= len(bags[i])*len(bags[j])
+                div = sqrt(len(bags[i])*len(bags[j]))
+                self.subkernels[:,i,j] /= div
+                if i != j:
+                    self.subkernels[:,j,i] /= div
 
     cdef void _optimize(self, np.ndarray[np.int_t, ndim=1] y):
         cdef unsigned int n = y.shape[0]
@@ -242,6 +245,9 @@ cdef class CoMIK(MikSvm):
         eta_starting_idx = len(constraints)
         for i in range(self.nb_exp_points):
             constraints += [traces[i]*zeta >= cp.quad_form(alphas, weighted_kernels[i])]
+            # TODO: There is some DCP issue to solve here
+            if not constraints[-1].is_dcp():
+                print(weighted_kernels[i])
         for i, c in enumerate(constraints):
             assert c.is_dcp(), "constraint {} is not DCP".format(c)
         prob = cp.Problem(obj, constraints)

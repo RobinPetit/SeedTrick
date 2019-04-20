@@ -132,18 +132,18 @@ cdef class ODHKernel(Kernel):
                 Kernel matrix
         '''
         cdef bint Y_is_None = Y is None or X is Y
-        counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa)
+        counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa).tocsr()
         if Y_is_None:
             ret = counts_X * counts_X.T
             if self.normalized:
                 _normalize_array_XX(ret, len(X))
         else:
-            counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa)
+            counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa).tocsr()
             if self.normalized:
                 _normalize_rows(counts_X)
                 _normalize_rows(counts_Y)
-            ret = counts_X * counts_Y.T
-        return ret
+            ret = counts_X.dot(counts_Y.T)
+        return ret.toarray()
 
     cdef double single_instance(self, str x, str x_prime):
         return (_get_count_matrix([x], self.k, self.max_dist, self.aa).dot(_get_count_matrix([x_prime], self.k, self.max_dist, self.aa).T))[0,0]

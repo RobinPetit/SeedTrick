@@ -11,9 +11,9 @@ unsigned int _kmer_to_idx_aa(const char *s, unsigned int k) {
 	unsigned int i;
 	for(i = 0; i < k; ++i) {
 		ret *= NB_AMINO_ACIDS;
-		ret += _aa_to_int[s[i] - 'A'];
+		ret += _aa_to_int[s[i] - 'A']-1;
 	}
-	return ret - 1;
+	return ret;
 }
 
 static inline unsigned int nt_idx(char nt) {

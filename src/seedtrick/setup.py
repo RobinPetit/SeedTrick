@@ -19,6 +19,7 @@ SRC_FILES = [
     # svm
     (['svm/miksvm.c'], 'svm.miksvm'),
     (['svm/comik.c'], 'svm.comik'),
+    (['svm/custom.c'], 'svm.custom'),
 ]
 
 libraries = ["m"]
