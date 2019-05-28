@@ -29,7 +29,24 @@ def _get_kmer_counts(s, K):
 def test_imports():
     import seedtrick
 
-def test_suffix_tree():
+def test_empty_sparse_vector():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector(0)
+    v[5] = 10
+    assert len(v) == 0
+
+def test_fill_sparse_vector():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector(5)
+    for i in range(1, 6):
+        v[2**i] = i
+    assert len(v) == 5
+    assert v[10] == 0
+    assert v[16] == 4
+    v[16] = 0
+    assert len(v) == 4
+
+def _test_suffix_tree():
     K = 3
     from seedtrick.algo import suffixtree
     hist1h1b_human = _hist1h1b_human
@@ -57,6 +74,20 @@ def test_spectrum_kernel():
     for k in set(human_kmer_counts.keys()) & set(mouse_kmer_counts.keys()):
         expected_value += human_kmer_counts[k] * mouse_kmer_counts[k]
     assert kernel_value == expected_value
+
+def test_odh():
+    from seedtrick.kernels import ODHKernel
+    odh = ODHKernel(3, normalized=False, aa=True)
+    X = ['CDEFG', 'ACDEFYRS']
+    K = odh.get_K_matrix(X, X)
+    print(K)
+    assert K[0,1] == 3
+    '''              ^
+    common pairs of kmers are:
+        CDE-CDE
+        CDE-EDF
+        EDF-EDF
+    '''
 
 def test_mik():
     import numpy as np

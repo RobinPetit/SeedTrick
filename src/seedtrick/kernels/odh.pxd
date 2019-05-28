@@ -1,6 +1,7 @@
 #cython:language_level=3
 
 from seedtrick.kernels.base cimport Kernel
+from seedtrick.algo.sparse cimport SparseMatrix
 
 cdef extern from "_odh.h":
 	unsigned int _kmer_to_idx_aa(const char *, unsigned int)
@@ -15,4 +16,4 @@ cdef class ODHKernel(Kernel):
 
 	cdef double single_instance(self, str x, str x_prime)
 
-	cdef object vectorize(self, seqs, bint lil)
+	cdef SparseMatrix vectorize(self, seqs)
