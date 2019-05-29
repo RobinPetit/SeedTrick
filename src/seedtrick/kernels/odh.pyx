@@ -32,7 +32,6 @@ cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsi
         D = <unsigned int>max_dist
     counts = SparseMatrix(nb_strings)
     for k in range(nb_strings):
-        print(k)
         len_k = strlen(strings[k])
         for i in range(len_k-K+1):
             j_max = i+D if i+D < len_k-K+1 else len_k-K+1
