@@ -28,6 +28,8 @@ cdef extern from "_sparse.h":
 
 	cdef void _add_inplace(linked_list_t *dest, const linked_list_t *src)
 
+cdef float vectors_dist(SparseVector x, SparseVector y)
+
 cdef class SparseVector:
 	cdef linked_list_t ll
 

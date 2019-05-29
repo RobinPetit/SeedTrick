@@ -147,11 +147,16 @@ linked_list_t __add(const linked_list_t *x, const linked_list_t *y, bool subtrac
 			current_y = current_y->next;
 		}
 		if(current_y != NULL && current_y->idx == current_x->idx) {
-			append(&ret, current_x->idx, subtract ? current_x->value - current_y->value : current_x->value + current_y->value);
+			append(&ret, current_x->idx, subtract ? (current_x->value - current_y->value) : (current_x->value + current_y->value));
+			current_y = current_y->next;
 		} else {
 			append(&ret, current_x->idx, current_x->value);
 		}
 		current_x = current_x->next;
+	}
+	while(current_y != NULL) {
+		append(&ret, current_y->idx, subtract ? -current_y->value : current_y->value);
+		current_y = current_y->next;
 	}
 	return ret;
 }
@@ -179,8 +184,14 @@ void __add_inplace(linked_list_t *dest, const linked_list_t *src, bool subtract)
 				current_dest->value -= current_src->value;
 			else
 				current_dest->value += current_src->value;
+			current_src = current_src->next;
 		}
 		current_dest = current_dest->next;
+	}
+	// add the remaining entries
+	while(current_src != NULL) {
+		append(dest, current_src->idx, subtract ? -current_src->value : current_src->value);
+		current_src = current_src->next;
 	}
 }
 

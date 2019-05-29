@@ -1,11 +1,10 @@
 #cython:language_level=3
 
+from libc.math cimport sqrt
+
 cimport numpy as np
 import numpy as np
 
-import cython
-
-#@cython.final
 cdef class SparseVector:
     def __init__(self):
         self.ll = make_ll()
@@ -38,9 +37,19 @@ cdef class SparseVector:
         assert scalar != 0
         divide_by_scalar(&self.ll, scalar)
 
-    def __sub__(self, other):
-        #return subtraction_sparse_vectors(self, other)
+    def __sub__(self, SparseVector other):
         return subtract(self, other)
+
+    def __add__(self, SparseVector other):
+        return add(self, other)
+
+    def __iadd__(self, SparseVector other):
+        self.plus_equal(other)
+        return self
+
+    def __eq__(self, SparseVector other):
+        print('Testing equality')
+        return self.dist(other) == 0
 
     def __setitem__(self, key, value):
         self.set(int(key), float(value))
@@ -50,6 +59,13 @@ cdef class SparseVector:
 
     def __len__(self):
         return self.length()
+
+    def dist(self, SparseVector other):
+        return vectors_dist(self, other)
+
+cdef float vectors_dist(SparseVector x, SparseVector y):
+    cdef SparseVector diff = subtract(x, y)
+    return sqrt(diff.squared_ell2_norm())
 
 cdef class SparseMatrix:
     def __init__(self, unsigned int N):
@@ -127,6 +143,7 @@ cdef SparseVector add(SparseVector x, SparseVector y):
     cdef SparseVector ret = SparseVector()
     ret.ll = _add(&x.ll, &y.ll)
     return ret
+
 
 cdef np.ndarray pairwise_distances(SparseMatrix x, SparseMatrix y):
     cdef np.ndarray ret = np.empty((x.length(), y.length()), dtype=np.float)
