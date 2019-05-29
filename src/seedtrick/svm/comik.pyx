@@ -137,7 +137,6 @@ cdef class CoMIK(MikSvm):
     cdef float sigma
     cdef float C
     cdef np.ndarray subkernel_weights
-    cdef np.ndarray alpha
 
     def __init__(self, unsigned int k, unsigned int segment_size=50, unsigned int nb_exp_points=10, float tau=1, float sigma=25, float C=1):
         self.nb_exp_points = nb_exp_points
@@ -257,14 +256,10 @@ cdef class CoMIK(MikSvm):
         except cp.error.SolverError as e:
             print('Error while solving the problem...')
             print(e)
-        self.subkernel_weights = np.array([c.dual_value.flatten()[0] for c in prob.constraints[eta_starting_idx:]])
-        # renormalise weights
-        self.subkernel_weights /= sqrt(self.subkernel_weights.dot(self.subkernel_weights))
-        self.alpha = np.asarray(alphas.value)
-        # TODO: Meh?
+        self.subkernel_weights = np.sqrt(np.array([c.dual_value.flatten()[0] for c in prob.constraints[eta_starting_idx:]]))
+        # renormalise weights  (so that they sum to 1 -> ell^1 normalisation)
+        self.subkernel_weights /= self.subkernel_weights.sum()
         print('theta:', self.subkernel_weights)
-        print('alpha\' y:', self.alpha.dot(y))
-        print('alpha:', self.alpha)
         print('b:', prob.constraints[1].dual_value)
 
     cdef void _optimize_formulation_2(self, np.ndarray[np.int_t, ndim=1] y):

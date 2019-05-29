@@ -18,3 +18,4 @@
 + [ ] Implement different normalizations (feature-space normalization, sample normalization, averaging, etc.)
 + [x] Turn `SeedTrick` into a standalone package
 + [ ] Write a proper documentation
++ [ ] Use `Travis` to run the tests at each commit

@@ -1,4 +1,5 @@
 from collections import defaultdict
+import numpy as np
 
 # https://www.ncbi.nlm.nih.gov/nuccore/NM_005322
 _hist1h1b_human =  'MSETAPAETATPAPVEKSPAKKKATKKAAGAGAAKRKATGPPVSELITKAVAASKERNGLSLAALKKALAAGGYDVEKNNSRIKLGLKSLVSKGTLVQTKGTGASGSFKLNKKAASGEAKPKAKKAGAAKAKKPAGATPKKAKKAAGAKKAVKKTPKKAKKPAAAGVKKVAKSPKKAKAAAKPKKATKSPAKPKAVKPKAAKPKAAKPKAAKPKAAKAKKAAAKKK'
@@ -48,6 +49,47 @@ def test_fill_sparse_vector():
     for i in range(5, 0, -1):
         v[2**i] = i
     assert len(v) == 5
+
+def test_subtraction_sparse_vectors():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector()
+    w = SparseVector()
+    v[0] = v[3] = v[100] = 1
+    w[0] = w[4] = 1
+    z = v-w
+    assert z[0] == 0
+    assert z[3] == 1
+    assert z[4] == -1
+    assert z[100] == 1
+    assert len(z) == 3
+
+def test_add_sparase_vectors():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector()
+    w = SparseVector()
+    v[0] = v[3] = v[100] = 1
+    w[0] = w[4] = 1
+    z = v+w
+    assert len(z) == 4
+    assert z.dist(w+v) == 0
+
+def test_dist_vectors():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector()
+    w = SparseVector()
+    v[0] = v[3] = v[100] = 1
+    w[0] = w[4] = 1
+    assert np.abs(v.dist(w) - np.sqrt(3)) < 1e-5  #32-bit floats vs numpy's 64-bit floats
+
+def test_sparsevector_iadd():
+    from seedtrick.algo.sparse import SparseVector
+    v = SparseVector()
+    v[0] = v[4] = 1
+    v[5] = v[100] = 5
+    w = SparseVector()
+    w += v
+    print(len(v), len(w))
+    assert v.dist(w) == 0
 
 def test_suffix_tree():
     K = 3
