@@ -1,6 +1,8 @@
 #ifndef _SPARSE_H
 #define _SPARSE_H
 
+#include <stdbool.h>
+
 struct node {
 	float value;
 	unsigned long long int idx;
@@ -25,5 +27,13 @@ void free_ll(linked_list_t *ll);
 
 float dot_product(const linked_list_t *x, const linked_list_t *y);
 linked_list_t copy_ll(const linked_list_t *ll);
+
+linked_list_t _subtract(const linked_list_t *x, const linked_list_t *y);
+linked_list_t _add(const linked_list_t *x, const linked_list_t *y);
+
+void _add_inplace(linked_list_t *dest, const linked_list_t *src);
+void _subtract_inplace(linked_list_t *dest, const linked_list_t *src);
+
+void divide_by_scalar(linked_list_t *ll, float scalar);
 
 #endif // _SPARSE_H

@@ -5,7 +5,7 @@ import numpy as np
 
 import cython
 
-@cython.final
+#@cython.final
 cdef class SparseVector:
     def __init__(self):
         self.ll = make_ll()
@@ -31,8 +31,16 @@ cdef class SparseVector:
     cdef float dot(self, SparseVector other):
         return dot_product(&self.ll, &other.ll)
 
+    cdef void plus_equal(self, SparseVector other):
+        _add_inplace(&self.ll, &other.ll)
+
+    cdef void divide_by_scalar(self, float scalar):
+        assert scalar != 0
+        divide_by_scalar(&self.ll, scalar)
+
     def __sub__(self, other):
-        return subtraction_sparse_vectors(self, other)
+        #return subtraction_sparse_vectors(self, other)
+        return subtract(self, other)
 
     def __setitem__(self, key, value):
         self.set(int(key), float(value))
@@ -44,10 +52,9 @@ cdef class SparseVector:
         return self.length()
 
 cdef class SparseMatrix:
-    def __init__(self, shape):
+    def __init__(self, unsigned int N):
         cdef unsigned int i
-        self.N = shape[0]
-        self.M = shape[1]
+        self.N = N
         self.rows = np.empty(self.N, dtype=SparseVector)
         for i in range(self.N):
             self.rows[i] = SparseVector()
@@ -65,7 +72,7 @@ cdef class SparseMatrix:
             assert k.ndim == 1
             if not (k < len(self)).all():
                 raise IndexError()
-            ret = SparseMatrix((0, self.M))
+            ret = SparseMatrix(0)
             ret.N = k.shape[0]
             ret.rows = self.rows[k]
             return ret
@@ -84,39 +91,47 @@ cdef class SparseMatrix:
     def __len__(self):
         return self.N
 
-    cdef inline void _set_row(self, unsigned int idx, linked_list_t ll):
-        assert idx < self.N
-        cdef SparseVector[:] self_rows = self.rows
-        self_rows[idx].ll = ll
+    cdef unsigned int length(self):
+        return self.N
 
-cdef SparseMatrix clone_matrix(SparseMatrix m, int new_M=-1):
+cdef SparseMatrix clone_matrix(SparseMatrix m):
     cdef unsigned int i
-    if new_M > 0:
-        assert new_M > m.M
-    else:
-        new_M = m.M
-    ret = SparseMatrix((0, new_M))
+    cdef SparseVector tmp
+    ret = SparseMatrix(0)
     ret.N = m.N
+    ret.rows = np.empty(ret.N, dtype=SparseVector)
     cdef SparseVector[:] m_rows = m.rows
     for i in range(m.N):
-        ret._set_row(i, copy_ll(&m_rows[i].ll))
-    return ret
-
-cdef SparseVector subtraction_sparse_vectors(SparseVector x, SparseVector y):
-    cdef SparseVector ret = SparseVector(x.nb_non_negative_entries + y.nb_non_negative_entries)
-    cdef unsigned int i
-    for i in range(x.i):
-        ret.set(x.indices[i], x.values[i] - y.get(x.indices[i]))
-    for i in range(y.i):
-        ret.set(y.indices[i], x.get(y.indices[i]) - y.values[i])
+        tmp = SparseVector()
+        tmp.ll = copy_ll(&m_rows[i].ll)
+        ret.rows[i] = tmp
     return ret
 
 cdef np.ndarray cdot_sparse_matrices(SparseMatrix x, SparseMatrix y):
     cdef np.ndarray ret = np.empty((x.N, y.N), dtype=np.float)
     cdef unsigned int i, j
-    cdef SparseVector[:] rows_x = x.rows
-    cdef SparseVector[:] rows_y = y.rows
+    cdef SparseVector row_x, row_y
     for i in range(x.N):
+        row_x = x.rows[i]
         for j in range(y.N):
-            ret[i,j] = rows_x[i].dot(rows_y[j])
+            row_y = y.rows[j]
+            ret[i,j] = row_x.dot(row_y)
+    return ret
+
+cdef SparseVector subtract(SparseVector x, SparseVector y):
+    cdef SparseVector ret = SparseVector()
+    ret.ll = _subtract(&x.ll, &y.ll)
+    return ret
+
+cdef SparseVector add(SparseVector x, SparseVector y):
+    cdef SparseVector ret = SparseVector()
+    ret.ll = _add(&x.ll, &y.ll)
+    return ret
+
+cdef np.ndarray pairwise_distances(SparseMatrix x, SparseMatrix y):
+    cdef np.ndarray ret = np.empty((x.length(), y.length()), dtype=np.float)
+    cdef unsigned int i, j
+    for i in range(x.length()):
+        for j in range(y.length()):
+            ret[i,j] = subtract(x.rows[i], y.rows[j]).squared_ell2_norm()
     return ret

@@ -5,15 +5,12 @@ cimport numpy as np
 
 from libc.string cimport strlen, strncpy, strcpy
 from libc.stdlib cimport malloc, free
-from libc.stdio cimport printf
 from libc.math cimport pow, sqrt
 
 from seedtrick.kernels.base cimport Kernel
 
 # Need a sparse matrix to store the matrix of projections X = [\Phi(S_i)]_i
 # that is only 1 in 20^(2k) dense
-####from scipy.sparse import csr_matrix, lil_matrix
-####SparseMatrix = lil_matrix
 from seedtrick.algo.sparse import SparseMatrix
 from seedtrick.algo.sparse cimport cdot_sparse_matrices
 
@@ -33,16 +30,13 @@ cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsi
         D = L_max - K + 1
     else:
         D = <unsigned int>max_dist
-    nb_non_zero_entries = D*(L_max - K + 1) - (D*(D-1)) // 2
-    counts = SparseMatrix((nb_strings, nb_non_zero_entries))
+    counts = SparseMatrix(nb_strings)
     for k in range(nb_strings):
         print(k)
         len_k = strlen(strings[k])
         for i in range(len_k-K+1):
             j_max = i+D if i+D < len_k-K+1 else len_k-K+1
             for j in range(i, j_max):
-                if j-i >= D:
-                    break
                 counts[k, kmer2idx(&strings[k][i], K)*M*D + kmer2idx(&strings[k][j], K)*D + j-i] += 1
     return counts
 
