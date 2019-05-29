@@ -31,13 +31,12 @@ def test_imports():
 
 def test_empty_sparse_vector():
     from seedtrick.algo.sparse import SparseVector
-    v = SparseVector(0)
-    v[5] = 10
+    v = SparseVector()
     assert len(v) == 0
 
 def test_fill_sparse_vector():
     from seedtrick.algo.sparse import SparseVector
-    v = SparseVector(5)
+    v = SparseVector()
     for i in range(1, 6):
         v[2**i] = i
     assert len(v) == 5
@@ -45,8 +44,12 @@ def test_fill_sparse_vector():
     assert v[16] == 4
     v[16] = 0
     assert len(v) == 4
+    v = SparseVector()
+    for i in range(5, 0, -1):
+        v[2**i] = i
+    assert len(v) == 5
 
-def _test_suffix_tree():
+def test_suffix_tree():
     K = 3
     from seedtrick.algo import suffixtree
     hist1h1b_human = _hist1h1b_human
@@ -89,7 +92,7 @@ def test_odh():
         EDF-EDF
     '''
 
-def test_mik():
+def _test_mik():
     import numpy as np
     from seedtrick.svm import CoMIK
     DIR = '/media/robin/DATA/comik/sample_data/simulated_dataset1'

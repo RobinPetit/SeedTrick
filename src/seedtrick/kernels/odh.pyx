@@ -21,22 +21,26 @@ cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsi
     cdef unsigned int L_max = 0
     cdef unsigned int i, j, k, d
     cdef unsigned int N
-    cdef unsigned int D, M = <unsigned int>pow(20, K) if kmer2idx == _kmer_to_idx_aa else <unsigned int>pow(4, K)
-    #cdef unsigned int latent_dimensions
+    cdef unsigned int D
+    cdef unsigned int M = <unsigned int>pow(20, K) if kmer2idx == _kmer_to_idx_aa else <unsigned int>pow(4, K)
+    cdef unsigned int len_k, j_max
+
+    for i in range(nb_strings):
+        N = strlen(strings[i])
+        if N > L_max:
+            L_max = N
     if max_dist < 0:
-        for i in range(nb_strings):
-            N = strlen(strings[i])
-            if N > L_max:
-                L_max = N
         D = L_max - K + 1
     else:
         D = <unsigned int>max_dist
-    #latent_dimensions = D*M*M
-    nb_non_zero_entries = ((L_max - K + 1) * (L_max - K + 2)) // 2
+    nb_non_zero_entries = D*(L_max - K + 1) - (D*(D-1)) // 2
     counts = SparseMatrix((nb_strings, nb_non_zero_entries))
     for k in range(nb_strings):
-        for i in range(strlen(strings[k])-K+1):
-            for j in range(i, strlen(strings[k])-K+1):
+        print(k)
+        len_k = strlen(strings[k])
+        for i in range(len_k-K+1):
+            j_max = i+D if i+D < len_k-K+1 else len_k-K+1
+            for j in range(i, j_max):
                 if j-i >= D:
                     break
                 counts[k, kmer2idx(&strings[k][i], K)*M*D + kmer2idx(&strings[k][j], K)*D + j-i] += 1
@@ -139,28 +143,13 @@ cdef class ODHKernel(Kernel):
         counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa)
         if Y_is_None:
             ret = cdot_sparse_matrices(counts_X, counts_X)
-            for j in range(len(counts_X)):
-                print(counts_X[j].get_indices())
-                for i in counts_X[j].get_indices():
-                    print(counts_X[j,i], end='  ')
-                print('')
-            #ret = counts_X * counts_X.T
             if self.normalized:
                 _normalize_array_XX(ret, len(X))
         else:
             counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa)
-            print(counts_X[0].get_indices())
-            for i in counts_X[0].get_indices():
-                print(counts_X[0,i], end='  ')
-            print('')
-            print(counts_Y[0].get_indices())
-            for i in counts_Y[0].get_indices():
-                print(counts_Y[0,i], end='  ')
-            print('')
             if self.normalized:
                 _normalize_rows(counts_X)
                 _normalize_rows(counts_Y)
-            #ret = counts_X.dot(counts_Y.T)
             ret = cdot_sparse_matrices(counts_X, counts_Y)
         assert isinstance(ret, np.ndarray)
         return ret

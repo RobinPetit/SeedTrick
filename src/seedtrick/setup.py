@@ -16,7 +16,7 @@ SRC_FILES = [
     (['kernels/odh.c', 'algo/_odh.c'], 'kernels.odh'),
     # algo
     (['algo/suffixtree.c', 'algo/_kmersuffixtree.c'], 'algo.suffixtree'),
-    (['algo/sparse.c'], 'algo.sparse'),
+    (['algo/sparse.c', 'algo/_sparse.c'], 'algo.sparse'),
     # svm
     (['svm/miksvm.c'], 'svm.miksvm'),
     (['svm/comik.c'], 'svm.comik'),
