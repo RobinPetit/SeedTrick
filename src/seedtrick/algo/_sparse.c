@@ -106,6 +106,18 @@ void free_ll(linked_list_t *ll) {
 	ll->first = ll->last = NULL;
 }
 
+float sum_of_components(const linked_list_t *ll) {
+	float ret = 0;
+	if(ll->length == 0)
+		return 0;
+	node_t *current = ll->first;
+	while(current != NULL) {
+		ret += current->value;
+		current = current->next;
+	}
+	return ret;
+}
+
 float dot_product(const linked_list_t *x, const linked_list_t *y) {
 	float ret = 0;
 	node_t *current_x = x->first;

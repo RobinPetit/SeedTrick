@@ -107,6 +107,13 @@ cdef class SparseMatrix:
     def __len__(self):
         return self.N
 
+    def normalise_rows(self):
+        cdef unsigned int i
+        cdef SparseVector row
+        for i in range(self.N):
+            row  = self.rows[i]
+            row.divide_by_scalar(sqrt(row.squared_ell2_norm()))
+
     cdef unsigned int length(self):
         return self.N
 

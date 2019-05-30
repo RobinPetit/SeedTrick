@@ -14,7 +14,7 @@ from seedtrick.kernels.base cimport Kernel
 from seedtrick.algo.sparse import SparseMatrix
 from seedtrick.algo.sparse cimport cdot_sparse_matrices
 
-cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsigned int K, int max_dist, kmer2idx_t kmer2idx):
+cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsigned int K, int max_dist, kmer2idx_t kmer2idx, bint verbose):
     cdef unsigned int L_max = 0
     cdef unsigned int i, j, k, d
     cdef unsigned int N
@@ -32,6 +32,8 @@ cdef SparseMatrix _compute_X(const char **strings, unsigned int nb_strings, unsi
         D = <unsigned int>max_dist
     counts = SparseMatrix(nb_strings)
     for k in range(nb_strings):
+        if verbose:
+            print('String {}/{}'.format(k+1, nb_strings))
         len_k = strlen(strings[k])
         for i in range(len_k-K+1):
             j_max = i+D if i+D < len_k-K+1 else len_k-K+1
@@ -49,7 +51,7 @@ cdef void _normalize_array_XX(np.float_t[:,:] K, unsigned int N):
             K[i,j] / (norms[i]*norms[j])
     free(norms)
 
-cdef SparseMatrix _get_count_matrix(list X, unsigned int K, int max_dist, bint aa):
+cdef SparseMatrix _get_count_matrix(list X, unsigned int K, int max_dist, bint aa, bint verbose):
     cdef unsigned int N_X = len([x for x in X if len(x) >= K])
     cdef kmer2idx_t kmer2idx =  &_kmer_to_idx_aa if aa else &_kmer_to_idx_nt
     cdef char **strings_X = <char **>malloc(N_X * sizeof(char *))
@@ -62,7 +64,7 @@ cdef SparseMatrix _get_count_matrix(list X, unsigned int K, int max_dist, bint a
         strcpy(strings_X[j], X[i].encode('ASCII'))
         j += 1
     assert j == N_X
-    ret = _compute_X(strings_X, N_X, K, max_dist, kmer2idx)
+    ret = _compute_X(strings_X, N_X, K, max_dist, kmer2idx, verbose)
     for i in range(N_X):
         free(strings_X[i])
     free(strings_X)
@@ -133,13 +135,13 @@ cdef class ODHKernel(Kernel):
                 Kernel matrix
         '''
         cdef bint Y_is_None = Y is None or X is Y
-        counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa)
+        counts_X = _get_count_matrix(X, self.k, self.max_dist, self.aa, verbose=False)
         if Y_is_None:
             ret = cdot_sparse_matrices(counts_X, counts_X)
             if self.normalized:
                 _normalize_array_XX(ret, len(X))
         else:
-            counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa)
+            counts_Y = _get_count_matrix(Y, self.k, self.max_dist, self.aa, verbose=False)
             if self.normalized:
                 _normalize_rows(counts_X)
                 _normalize_rows(counts_Y)
@@ -148,10 +150,12 @@ cdef class ODHKernel(Kernel):
         return ret
 
     cdef double single_instance(self, str x, str x_prime):
-        return (_get_count_matrix([x], self.k, self.max_dist, self.aa).dot(_get_count_matrix([x_prime], self.k, self.max_dist, self.aa).T))[0,0]
+        return (_get_count_matrix([x], self.k, self.max_dist, self.aa, verbose=False).dot(_get_count_matrix([x_prime], self.k, self.max_dist, self.aa, verbose=False).T))[0,0]
 
-    cdef SparseMatrix vectorize(self, seqs):
+    cdef SparseMatrix vectorize(self, seqs, bint verbose):
         if not isinstance(seqs, list):
             seqs = list(seqs)
-        ret = _get_count_matrix(seqs, self.k, self.max_dist, self.aa)
+        ret = _get_count_matrix(seqs, self.k, self.max_dist, self.aa, verbose)
+        # normalise
+        ret.normalise_rows()
         return ret

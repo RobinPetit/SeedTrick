@@ -134,6 +134,18 @@ def test_odh():
         EDF-EDF
     '''
 
+def test_sparse_matrix_view():
+    from seedtrick.algo.sparse import SparseMatrix
+    M = SparseMatrix(1)
+    M[0,7] = 10
+    row = M[0]
+    assert M[0,7] == row[7]
+    row[5] = 14
+    assert M[0, 5] == 14
+    M2 = M[np.arange(1)]
+    M2[0,5] = -2
+    assert M[0,5] == M2[0,5]
+
 def _test_mik():
     import numpy as np
     from seedtrick.svm import CoMIK
@@ -141,7 +153,7 @@ def _test_mik():
     pos_examples = _fasta_reader(DIR + '/pos.fasta')[:10]
     neg_examples = _fasta_reader(DIR + '/neg.fasta')[:10]
     assert set(''.join(pos_examples + neg_examples)) == set('ATCG')
-    comik = CoMIK(3)
+    comik = CoMIK(2)
     print('{} pos examples and {} neg examples'.format(len(pos_examples), len(neg_examples)))
     X = np.array(pos_examples + neg_examples)
     y = np.zeros(len(X), dtype=np.int)

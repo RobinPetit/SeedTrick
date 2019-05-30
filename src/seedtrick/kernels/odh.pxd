@@ -16,4 +16,4 @@ cdef class ODHKernel(Kernel):
 
 	cdef double single_instance(self, str x, str x_prime)
 
-	cdef SparseMatrix vectorize(self, seqs)
+	cdef SparseMatrix vectorize(self, seqs, bint verbose)

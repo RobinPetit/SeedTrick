@@ -25,6 +25,8 @@ float get_value(const linked_list_t *ll, unsigned int idx);
 void remove_node(linked_list_t *ll, unsigned int idx);
 void free_ll(linked_list_t *ll);
 
+float sum_of_components(const linked_list_t *ll);
+
 float dot_product(const linked_list_t *x, const linked_list_t *y);
 linked_list_t copy_ll(const linked_list_t *ll);
 

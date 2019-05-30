@@ -20,6 +20,7 @@ cdef extern from "_sparse.h":
 	cdef void free_ll(linked_list_t *ll)
 	cdef float get_value(linked_list_t *ll, unsigned int idx)
 	cdef void append(linked_list_t *ll, unsigned int idx, float value)
+	cdef float sum_of_components(const linked_list_t *ll)
 	cdef float dot_product(const linked_list_t *x, const linked_list_t *y)
 	cdef linked_list_t copy_ll(const linked_list_t *ll)
 	cdef linked_list_t _subtract(const linked_list_t *x, const linked_list_t *y)
